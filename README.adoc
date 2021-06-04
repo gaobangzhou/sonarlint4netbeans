@@ -9,6 +9,6 @@
 
 java-sonarqube 的分支中删除了master分支中有关js,php的逻辑，仅仅关注了java的静态代码坚持
 
--删除了option界面，添加了sonarQube的配置界面，主要参数为 SonarQube Server 和 Quality Profile 2个参数
--修改了rules界面的过滤器，修改为 all，disable，enable 三个总数， 同时显示表格中的规则数量
--去掉 Sonar Rule Details 窗口中的 RuleList, 将checkBox 去掉， 在Detail窗口中进行 rule的 disable和enable切换不太有必要
+- 删除了option界面，添加了sonarQube的配置界面，主要参数为 SonarQube Server 和 Quality Profile 2个参数
+- 修改了rules界面的过滤器，修改为 all，disable，enable 三个总数， 同时显示表格中的规则数量
+- 去掉 Sonar Rule Details 窗口中的 RuleList, 将checkBox 去掉， 在Detail窗口中进行 rule的 disable和enable切换不太有必要
