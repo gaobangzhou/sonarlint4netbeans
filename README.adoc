@@ -7,7 +7,9 @@
 
 
 
-java-sonarqube 的分支中删除了master分支中有关js,php的逻辑，仅仅关注了java的静态代码坚持
+java-sonarqube 的分支中删除了master分支中有关js,php的逻辑，仅仅关注了java的静态代码检查
+
+后期该项目的只会更好的兼容java，以及链接sonarQube 服务方面进行拓展
 
 - 删除了option界面，添加了sonarQube的配置界面，主要参数为 SonarQube Server 和 Quality Profile 2个参数
 - 修改了rules界面的过滤器，修改为 all，disable，enable 三个总数， 同时显示表格中的规则数量
