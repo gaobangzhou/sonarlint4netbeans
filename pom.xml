@@ -3,20 +3,20 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.philippefichet</groupId>
     <artifactId>sonarlint4netbeans</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
+    <version>2.4.1-SNAPSHOT</version>
     <packaging>nbm</packaging>
     <name>SonarLint for Netbeans</name>
-    <description>SonarLint integration for Netbeans</description>
+    <description>SonarLint integration for Netbeans, fork from philippefichet/sonarlint4netbeans</description>
     <organization>
         <name>Philippe FICHET</name>
     </organization>
-    <url>https://github.com/philippefichet/sonarlint4netbeans</url>
+    <url>https://github.com/gaobangzhou/sonarlint4netbeans</url>
 
     <developers>
         <developer>
-            <id>philippefichet</id>
-            <name>Philippe FICHET</name>
-            <email>philippe.fichet@laposte.net</email>
+            <id>bzgao</id>
+            <name>bzgao</name>
+            <email>bzgao@fiberhome.com</email>
         </developer>
     </developers>
     <licenses>
@@ -27,10 +27,10 @@
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/philippefichet/sonarlint4netbeans</url>
-        <connection>scm:git:ssh://git@github.com/philippefichet/sonarlint4netbeans.git</connection>
-      <tag>HEAD</tag>
-  </scm>
+        <url>https://github.com/gaobangzhou/sonarlint4netbeans</url>
+        <connection>scm:git:ssh://git@github.com/gaobangzhou/sonarlint4netbeans.git</connection>
+        <tag>HEAD</tag>
+    </scm>
     <distributionManagement>
         <repository>
             <id>sonatype-nexus-staging</id>

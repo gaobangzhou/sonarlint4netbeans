@@ -48,18 +48,18 @@ public class SonarLintListMouseAdapter extends MouseAdapter {
             sonarLintAllRules.getCellBounds(locationToIndex,locationToIndex).contains(e.getPoint())
         ) {
             SonarLintListCellRenderer cellRenderer = (SonarLintListCellRenderer)sonarLintAllRules.getCellRenderer();
-            if (cellRenderer.clickOnCkeckBox(e.getPoint())) {
-                Optional<StandaloneRuleDetails> ruleDetails = sonarLintEngine.getRuleDetails(sonarLintAllRules.getSelectedValue());
-                ruleDetails.ifPresent(rule -> {
-                    RuleKey ruleKey = RuleKey.parse(rule.getKey());
-                    if (sonarLintEngine.isExcluded(rule)) {
-                        sonarLintEngine.includeRuleKey(ruleKey);
-                    } else {
-                        sonarLintEngine.excludeRuleKey(ruleKey);
-                    }
-                    sonarLintAllRules.repaint();
-                });
-            }
+//            if (cellRenderer.clickOnCkeckBox(e.getPoint())) {
+//                Optional<StandaloneRuleDetails> ruleDetails = sonarLintEngine.getRuleDetails(sonarLintAllRules.getSelectedValue());
+//                ruleDetails.ifPresent(rule -> {
+//                    RuleKey ruleKey = RuleKey.parse(rule.getKey());
+//                    if (sonarLintEngine.isExcluded(rule)) {
+//                        sonarLintEngine.includeRuleKey(ruleKey);
+//                    } else {
+//                        sonarLintEngine.excludeRuleKey(ruleKey);
+//                    }
+//                    sonarLintAllRules.repaint();
+//                });
+//            }
             if (cellRenderer.clickOnSettings(e.getPoint())) {
                 Optional<StandaloneRuleDetails> ruleDetails = sonarLintEngine.getRuleDetails(sonarLintAllRules.getSelectedValue());
                 ruleDetails.ifPresent(standaloneRule -> {

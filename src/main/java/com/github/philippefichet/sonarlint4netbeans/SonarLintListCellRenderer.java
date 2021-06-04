@@ -42,7 +42,7 @@ import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneRuleParam;
  */
 public final class SonarLintListCellRenderer extends JPanel implements ListCellRenderer<String> {
     private final SonarLintEngine sonarLintEngine;
-    private final JCheckBox enableOrDisable;
+    //private final JCheckBox enableOrDisable;
     private final JLabel modifyParameters;
     private final ImageIcon iconModifyParameters;
     private final ImageIcon iconNoParameters;
@@ -55,13 +55,13 @@ public final class SonarLintListCellRenderer extends JPanel implements ListCellR
         flowLayout.setHgap(0);
         flowLayout.setVgap(0);
         setLayout(flowLayout);
-        enableOrDisable = new JCheckBox();
-        enableOrDisable.setEnabled(true);
+        //enableOrDisable = new JCheckBox();
+        //enableOrDisable.setEnabled(true);
 
         iconModifyParameters = new ImageIcon(SonarLintUtils.class.getClassLoader().getResource("com/github/philippefichet/sonarlint4netbeans/resources/settings.png"), "Edit parameters rule");
         iconNoParameters = new ImageIcon(SonarLintUtils.class.getClassLoader().getResource("com/github/philippefichet/sonarlint4netbeans/resources/settings-empty.png"), "No parameters rule");
         modifyParameters = new JLabel(iconModifyParameters);
-        add(enableOrDisable);
+        //add(enableOrDisable);
         add(modifyParameters);
         add(defaultListCellRenderer);
     }
@@ -73,15 +73,15 @@ public final class SonarLintListCellRenderer extends JPanel implements ListCellR
         if (optionalRuleDetails.isPresent()) {
             StandaloneRuleDetails standaloneRule = optionalRuleDetails.get();
             if (standaloneRule.paramDetails().isEmpty()) {
-                modifyParameters.setIcon(iconModifyParameters);
-            } else {
                 modifyParameters.setIcon(iconNoParameters);
+            } else {
+                modifyParameters.setIcon(iconModifyParameters);
             }
             Optional<ImageIcon> toImageIcon = SonarLintUtils.toImageIcon(optionalRuleDetails.get().getSeverity());
             if (toImageIcon.isPresent()) {
                 defaultListCellRenderer.setIcon(toImageIcon.get());
             }
-            enableOrDisable.setSelected(!sonarLintEngine.isExcluded(optionalRuleDetails.get()));
+            //enableOrDisable.setSelected(!sonarLintEngine.isExcluded(optionalRuleDetails.get()));
             boolean hasCustomParamValue = false;
             for (StandaloneRuleParam param : standaloneRule.paramDetails()) {
                 if (sonarLintEngine.getRuleParameter(standaloneRule.getKey(), param.key()).isPresent()) {
@@ -102,14 +102,14 @@ public final class SonarLintListCellRenderer extends JPanel implements ListCellR
             defaultListCellRenderer.setFont(font.deriveFont(attributes));
         }
         setBackground(defaultListCellRenderer.getBackground());
-        enableOrDisable.setBackground(defaultListCellRenderer.getBackground());
+       // enableOrDisable.setBackground(defaultListCellRenderer.getBackground());
         return this;
     }
 
-    public boolean clickOnCkeckBox(Point point) {
-        return enableOrDisable.getBounds().getX() < point.getX()
-            && enableOrDisable.getBounds().getX() + enableOrDisable.getBounds().getWidth() > point.getX();
-    }
+//    public boolean clickOnCkeckBox(Point point) {
+//        return enableOrDisable.getBounds().getX() < point.getX()
+//            && enableOrDisable.getBounds().getX() + enableOrDisable.getBounds().getWidth() > point.getX();
+//    }
 
     public boolean clickOnSettings(Point point) {
         return modifyParameters.getBounds().getX() < point.getX()

@@ -76,8 +76,9 @@ public final class SonarLintUtils {
         private FilterBy() {
         }
 
-       /**
+        /**
          * Create a predicat to filter rule detail by language key
+         *
          * @param languageKey language key to filter
          * @return Predicat to filter rule detail by language key
          */
@@ -87,19 +88,19 @@ public final class SonarLintUtils {
 
         /**
          * Create a predicat to filter rule detail by key or name
+         *
          * @param keyOrName key or name to filter
          * @return Predicat to filter rule detail by key or name
          */
         public static Predicate<RuleDetails> keyAndName(String keyOrName) {
             String ruleFilterLowerCase = keyOrName.toLowerCase();
             return ruleDetail -> keyOrName.isEmpty()
-                || ruleDetail.getKey().toLowerCase().contains(ruleFilterLowerCase)
-                || ruleDetail.getName().toLowerCase().contains(ruleFilterLowerCase);
+                    || ruleDetail.getKey().toLowerCase().contains(ruleFilterLowerCase)
+                    || ruleDetail.getName().toLowerCase().contains(ruleFilterLowerCase);
         }
     }
 
-    public static Optional<ImageIcon> toImageIcon(String severity)
-    {
+    public static Optional<ImageIcon> toImageIcon(String severity) {
         URL resource = SonarLintUtils.class.getClassLoader().getResource("com/github/philippefichet/sonarlint4netbeans/resources/sonarlint-" + severity.toLowerCase() + ".png");
         if (resource == null) {
             return Optional.empty();
@@ -107,8 +108,7 @@ public final class SonarLintUtils {
         return Optional.of(new ImageIcon(resource, severity));
     }
 
-    public static String toURL(RuleDetails ruleDetails)
-    {
+    public static String toURL(RuleDetails ruleDetails) {
         String[] keySplit = ruleDetails.getKey().split(":");
         return "https://rules.sonarsource.com/" + keySplit[0] + "/RSPEC-" + keySplit[1].substring(1);
     }
@@ -125,16 +125,16 @@ public final class SonarLintUtils {
         String sonarLintHome = System.getProperty("user.home") + File.separator + ".sonarlint4netbeans";
         List<Issue> issues = new ArrayList<>();
         Collection<StandaloneRuleDetails> allRuleDetails = sonarLintEngine.getAllRuleDetails();
-        List<RuleKey> excludedRules = new ArrayList<>();
-        List<RuleKey> includedRules = new ArrayList<>();
-        for (RuleDetails allRuleDetail : allRuleDetails) {
-            RuleKey ruleKey = RuleKey.parse(allRuleDetail.getKey());
-            if (sonarLintEngine.isExcluded(allRuleDetail)) {
-                excludedRules.add(ruleKey);
-            } else {
-                includedRules.add(ruleKey);
-            }
-        }
+//        List<RuleKey> excludedRules = new ArrayList<>();
+//        List<RuleKey> includedRules = new ArrayList<>();
+//        for (StandaloneRuleDetails allRuleDetail : allRuleDetails) {
+//            RuleKey ruleKey = RuleKey.parse(allRuleDetail.getKey());
+//            if (!sonarLintEngine.isSonarQubeRule(allRuleDetail)) {
+//                excludedRules.add(ruleKey);
+//            } else {
+//                includedRules.add(ruleKey);
+//            }
+//        }
 
         File toFile = FileUtil.toFile(fileObject);
         if (toFile == null) {
@@ -143,29 +143,28 @@ public final class SonarLintUtils {
         Path path = toFile.toPath();
         List<ClientInputFile> files = new ArrayList<>();
         boolean applyTestRules = useTestRules && SonarLintUtils.isTest(fileObject);
-       files.add(new FSClientInputFile(
-            contentToAnalyze == null ? new String(Files.readAllBytes(path)) : contentToAnalyze,
-            path.toAbsolutePath(),
-            path.toFile().getName(),
-            applyTestRules,
-            FileEncodingQuery.getEncoding(fileObject))
+        files.add(new FSClientInputFile(
+                contentToAnalyze == null ? new String(Files.readAllBytes(path)) : contentToAnalyze,
+                path.toAbsolutePath(),
+                path.toFile().getName(),
+                applyTestRules,
+                FileEncodingQuery.getEncoding(fileObject))
         );
 
-        StandaloneAnalysisConfiguration standaloneAnalysisConfiguration =
-            StandaloneAnalysisConfiguration.builder()
-            .setBaseDir(new File(sonarLintHome).toPath())
-            .addInputFiles(files)
-            .addExcludedRules(excludedRules)
-            .addIncludedRules(includedRules)
-            .addRuleParameters(sonarLintEngine.getRuleParameters())
-            .build();
-
+        StandaloneAnalysisConfiguration standaloneAnalysisConfiguration
+                = StandaloneAnalysisConfiguration.builder()
+                        .setBaseDir(new File(sonarLintHome).toPath())
+                        .addInputFiles(files)
+                        .addExcludedRules(sonarLintEngine.getExcludedKeys())
+                        .addIncludedRules(sonarLintEngine.getIncludedKeys())
+                        .addRuleParameters(sonarLintEngine.getRuleParameters())
+                        .build();
 
         AnalysisResults analyze = sonarLintEngine.analyze(
-            standaloneAnalysisConfiguration,
-            issues::add,
-            null,
-            null
+                standaloneAnalysisConfiguration,
+                issues::add,
+                null,
+                null
         );
         return issues;
     }
@@ -193,11 +192,11 @@ public final class SonarLintUtils {
 
     /**
      * Retrive stylesheet for HTML rule detail description
+     *
      * @param sonarLintOptions
      * @return Stylesheet for HTML rule detail description
      */
-    public static String toRuleDetailsStyleSheet(SonarLintOptions sonarLintOptions)
-    {
+    public static String toRuleDetailsStyleSheet(SonarLintOptions sonarLintOptions) {
         try {
             return "<style>\n" + sonarLintOptions.getSonarLintDetailsStyle().asText() + "\n</style>";
         } catch (IOException ex) {
@@ -208,30 +207,30 @@ public final class SonarLintUtils {
 
     /**
      * Retrieve HTML detail description of rule
+     *
      * @param ruleDetails Detail of rule
      * @return HTML detail description of rule
      */
-    public static String toHtmlDescription(RuleDetails ruleDetails)
-    {
+    public static String toHtmlDescription(RuleDetails ruleDetails) {
         return "<div id=\"" + ruleDetails.getKey().replaceAll(":", "-") + "\">"
-            + "<h1><a href=\"" + SonarLintUtils.toURL(ruleDetails) + "\">" + ruleDetails.getName() + "</a></h1>"
-            + ruleDetails.getHtmlDescription()
-            + "</div>";
+                + "<h1><a href=\"" + SonarLintUtils.toURL(ruleDetails) + "\">" + ruleDetails.getName() + "</a></h1>"
+                + ruleDetails.getHtmlDescription()
+                + "</div>";
     }
 
     /**
-     * 
+     *
      * @param files
      * @param listener
      * @param clientInputFileInputStreamEvent
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     public static AnalysisResults analyze(
-        List<File> files,
-        IssueListener listener,
-        ClientInputFileListener clientInputFileInputStreamEvent,
-        SonarLintAnalyzerCancelableTask sonarLintAnalyzerCancelableTask
+            List<File> files,
+            IssueListener listener,
+            ClientInputFileListener clientInputFileInputStreamEvent,
+            SonarLintAnalyzerCancelableTask sonarLintAnalyzerCancelableTask
     ) throws IOException {
         SonarLintEngine sonarLintEngine = Lookup.getDefault().lookup(SonarLintEngine.class);
         if (sonarLintEngine == null) {
@@ -239,18 +238,7 @@ public final class SonarLintUtils {
         }
 
         String sonarLintHome = System.getProperty("user.home") + File.separator + ".sonarlint4netbeans";
-        Collection<StandaloneRuleDetails> allRuleDetails = sonarLintEngine.getAllRuleDetails();
-        List<RuleKey> excludedRules = new ArrayList<>();
-        List<RuleKey> includedRules = new ArrayList<>();
-        for (RuleDetails allRuleDetail : allRuleDetails) {
-            RuleKey ruleKey = RuleKey.parse(allRuleDetail.getKey());
-            if (sonarLintEngine.isExcluded(allRuleDetail)) {
-                excludedRules.add(ruleKey);
-            } else {
-                includedRules.add(ruleKey);
-            }
-        }
-        
+
         List<FSClientInputFile> clientInputFiles = new ArrayList<>();
         for (File file : files) {
             // Map file to implementation of ClientInputFile
@@ -259,43 +247,42 @@ public final class SonarLintUtils {
                 Charset encoding = FileEncodingQuery.getEncoding(FileUtil.toFileObject(file));
                 FileObject fileObject = FileUtil.toFileObject(file);
                 clientInputFiles.add(new FSClientInputFile(
-                    new String(Files.readAllBytes(path)),
-                    path.toAbsolutePath(),
-                    path.toFile().getName(),
-                    fileObject != null && SonarLintUtils.isTest(fileObject),
-                    encoding
+                        new String(Files.readAllBytes(path)),
+                        path.toAbsolutePath(),
+                        path.toFile().getName(),
+                        fileObject != null && SonarLintUtils.isTest(fileObject),
+                        encoding
                 ));
             } catch (IOException ex) {
                 LOG.warning("Error during getEncoding from \"" + file.getAbsolutePath() + "\": " + ex.getMessage());
             }
         }
 
-        StandaloneAnalysisConfiguration standaloneAnalysisConfiguration =
-            StandaloneAnalysisConfiguration.builder()
-            .setBaseDir(new File(sonarLintHome).toPath())
-            .addInputFiles(clientInputFiles)
-            .addExcludedRules(excludedRules)
-            .addIncludedRules(includedRules)
-            .addRuleParameters(sonarLintEngine.getRuleParameters())
-            .build();
+        StandaloneAnalysisConfiguration standaloneAnalysisConfiguration
+                = StandaloneAnalysisConfiguration.builder()
+                        .setBaseDir(new File(sonarLintHome).toPath())
+                        .addInputFiles(clientInputFiles)
+                        .addExcludedRules(sonarLintEngine.getExcludedKeys())
+                        .addIncludedRules(sonarLintEngine.getIncludedKeys())
+                        .addRuleParameters(sonarLintEngine.getRuleParameters())
+                        .build();
 
         // Add listener only after configuration to prevent ClientInputFile.uri() call during configuration phase
         clientInputFiles.forEach(file -> file.addListener(clientInputFileInputStreamEvent));
         AnalysisResults analyze = sonarLintEngine.analyze(
-            standaloneAnalysisConfiguration,
-            listener,
-            null,
-            new ProgressMonitor() {
-                @Override
-                public boolean isCanceled() {
-                    return sonarLintAnalyzerCancelableTask != null && sonarLintAnalyzerCancelableTask.isCanceled();
-                }
+                standaloneAnalysisConfiguration,
+                listener,
+                null,
+                new ProgressMonitor() {
+            @Override
+            public boolean isCanceled() {
+                return sonarLintAnalyzerCancelableTask != null && sonarLintAnalyzerCancelableTask.isCanceled();
             }
+        }
         );
         return analyze;
     }
 
-    
     public static List<File> toFiles(Node[] nodes) {
         List<File> files = new ArrayList<>();
         for (Node node : nodes) {
@@ -308,18 +295,18 @@ public final class SonarLintUtils {
                         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                             return FileVisitResult.CONTINUE;
                         }
-                        
+
                         @Override
                         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                             files.add(file.toFile());
                             return FileVisitResult.CONTINUE;
                         }
-                        
+
                         @Override
                         public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
                             return FileVisitResult.SKIP_SUBTREE;
                         }
-                        
+
                         @Override
                         public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                             return FileVisitResult.CONTINUE;
@@ -332,15 +319,15 @@ public final class SonarLintUtils {
         }
         return files;
     }
-    
+
     /**
      * Cut start URI too long
+     *
      * @param uri
-     * @param maximalLength 
-     * @return 
+     * @param maximalLength
+     * @return
      */
-    public static final String toTruncateURI(URI uri, int maximalLength)
-    {
+    public static final String toTruncateURI(URI uri, int maximalLength) {
         if (uri == null) {
             return null;
         }
@@ -350,7 +337,7 @@ public final class SonarLintUtils {
         }
         StringBuilder sb = new StringBuilder();
         String[] split = uriPath.split("/");
-        for (int i = split.length - 1 ; i >= 1 ; i--) {
+        for (int i = split.length - 1; i >= 1; i--) {
             sb.insert(0, split[i]);
             if ((sb.length() + 3) > maximalLength) {
                 sb.insert(0, ".../");
@@ -364,6 +351,7 @@ public final class SonarLintUtils {
 
     /**
      * Search a rule parameter
+     *
      * @param ruleDetail rule to search
      * @param parameterName parameter name to search
      * @return rule parameter if exist
@@ -377,8 +365,7 @@ public final class SonarLintUtils {
         return Optional.empty();
     }
 
-    public static Optional<Version> detectNodeJSVersion(String nodeJSPath)
-    {
+    public static Optional<Version> detectNodeJSVersion(String nodeJSPath) {
         ProcessBuilder processBuilder = new ProcessBuilder(nodeJSPath, "--version");
         try {
             Process start = processBuilder.start();

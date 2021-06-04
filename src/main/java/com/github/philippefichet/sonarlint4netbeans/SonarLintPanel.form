@@ -68,7 +68,7 @@
               <Properties>
                 <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
                   <StringArray count="3">
-                    <StringItem index="0" value="Options"/>
+                    <StringItem index="0" value="SonarQube"/>
                     <StringItem index="1" value="Rules"/>
                     <StringItem index="2" value="Analyzers"/>
                   </StringArray>
@@ -76,6 +76,7 @@
                 <Property name="selectionMode" type="int" value="0"/>
               </Properties>
               <AuxValues>
+                <AuxValue name="JavaCodeGenerator_SerializeTo" type="java.lang.String" value="SonarLintPanel_categoriesList"/>
                 <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
               </AuxValues>
             </Component>
@@ -84,11 +85,6 @@
       </SubComponents>
     </Container>
     <Container class="javax.swing.JScrollPane" name="optionScrollPane">
-      <Properties>
-        <Property name="viewportView" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-          <ComponentRef name="null"/>
-        </Property>
-      </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
           <BorderConstraints direction="Center"/>
@@ -100,7 +96,7 @@
         <Container class="javax.swing.JPanel" name="optionPanel">
           <Properties>
             <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-              <Color id="Curseur par d&#xe9;faut"/>
+              <Color id="&#x9ed8;&#x8ba4;&#x5149;&#x6807;"/>
             </Property>
           </Properties>
 

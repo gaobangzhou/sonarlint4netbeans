@@ -44,23 +44,24 @@ import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneRuleDetail
 
 /**
  * Top component which displays something.
+ *
  * @author FICHET Philippe &lt;philippe.fichet@laposte.net&gt;
  */
 @ConvertAsProperties(
-    dtd = "-//com.github.philippefichet.sonarlint4netbeans//SonarRuleDetails//EN",
-    autostore = false
+        dtd = "-//com.github.philippefichet.sonarlint4netbeans//SonarRuleDetails//EN",
+        autostore = false
 )
 @TopComponent.Description(
-    preferredID = "SonarRuleDetailsTopComponent",
-    iconBase = "com/github/philippefichet/sonarlint4netbeans/resources/sonarlint.png",
-    persistenceType = TopComponent.PERSISTENCE_ALWAYS
+        preferredID = "SonarRuleDetailsTopComponent",
+        iconBase = "com/github/philippefichet/sonarlint4netbeans/resources/sonarlint.png",
+        persistenceType = TopComponent.PERSISTENCE_ALWAYS
 )
 @TopComponent.Registration(mode = "output", openAtStartup = false)
 @ActionID(category = "Window", id = "com.github.philippefichet.sonarlint4netbeans.SonarRuleDetailsTopComponent")
 @ActionReference(path = "Menu/Window" /*, position = 333 */)
 @TopComponent.OpenActionRegistration(
-    displayName = "#CTL_SonarRuleDetailsAction",
-    preferredID = "SonarRuleDetailsTopComponent"
+        displayName = "#CTL_SonarRuleDetailsAction",
+        preferredID = "SonarRuleDetailsTopComponent"
 )
 @Messages({
     "CTL_SonarRuleDetailsAction=Sonar Rule Details",
@@ -199,23 +200,24 @@ public final class SonarRuleDetailsTopComponent extends TopComponent {
         });
     }//GEN-LAST:event_sonarLintAllRulesValueChanged
 
-    private void initListAllRuleDetailsRenderer()
-    {
+    private void initListAllRuleDetailsRenderer() {
         SonarLintOptions sonarLintOptions = Lookup.getDefault().lookup(SonarLintOptions.class);
         SonarLintEngine sonarLintEngine = Lookup.getDefault().lookup(SonarLintEngine.class);
         sonarLintEngine.whenConfigurationChanged(engine -> sonarLintAllRules.repaint());
         sonarLintAllRules.setCellRenderer(new SonarLintListCellRenderer(sonarLintEngine));
         sonarLintAllRules.addMouseListener(new SonarLintListMouseAdapter(sonarLintAllRules, sonarLintOptions, sonarLintEngine));
     }
-    
+
     private void initListAllRuleDetails() {
         SonarLintEngine sonarLintEngine = Lookup.getDefault().lookup(SonarLintEngine.class);
         sonarLintEngine.whenInitialized((SonarLintEngine engine) -> {
             DefaultListModel<String> model = new DefaultListModel<>();
             Collection<StandaloneRuleDetails> rules = engine.getAllRuleDetails();
             rules.stream().sorted((r1, r2) -> r1.getKey().compareTo(r2.getKey()))
-            .filter(SonarLintUtils.FilterBy.keyAndName(ruleKeyFilter))
-            .forEach(rule -> model.addElement(rule.getKey()));
+                    .filter(SonarLintUtils.FilterBy.keyAndName(ruleKeyFilter).and((t) -> {
+                        return engine.isInCludedRule((StandaloneRuleDetails) t);
+                    }))
+                    .forEach(rule -> model.addElement(rule.getKey()));
             sonarLintAllRules.setModel(model);
             sonarLintAllRules.updateUI();
         });
@@ -253,9 +255,8 @@ public final class SonarRuleDetailsTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
-    
-    public void setSonarRuleKeyFilter(String sonarRuleKeyFilter)
-    {
+
+    public void setSonarRuleKeyFilter(String sonarRuleKeyFilter) {
         this.sonarRuleKeyFilter.setText(sonarRuleKeyFilter);
         ruleKeyFilter = this.sonarRuleKeyFilter.getText().toLowerCase();
         initListAllRuleDetails();

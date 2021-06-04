@@ -19,6 +19,7 @@
  */
 package com.github.philippefichet.sonarlint4netbeans;
 
+import com.github.philippefichet.sonarlint4netbeans.option.Rule;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,6 @@ import java.util.prefs.Preferences;
 import org.sonarsource.sonarlint.core.client.api.common.LogOutput;
 import org.sonarsource.sonarlint.core.client.api.common.PluginDetails;
 import org.sonarsource.sonarlint.core.client.api.common.ProgressMonitor;
-import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.common.RuleKey;
 import org.sonarsource.sonarlint.core.client.api.common.Version;
 import org.sonarsource.sonarlint.core.client.api.common.analysis.AnalysisResults;
@@ -58,25 +58,6 @@ public interface SonarLintEngine {
     public void waitingInitialization();
 
     /**
-     * Retrieve NodeJS path if customized
-     * @return NodeJS path
-     */
-    public Optional<String> getNodeJSPath();
-
-    /**
-     * Retrieve NodeJS path if customized
-     * @return NodeJS path
-     */
-    public Optional<Version> getNodeJSVersion();
-
-    /**
-     * Custom NodeJS Path
-     * @param nodeJSPath new NodeJS path
-     * @param nodeJSversion Version of NodeJS used
-     */
-    public void setNodeJSPathAndVersion(String nodeJSPath, Version nodeJSversion);
-
-    /**
      * Return rule details of all available rules.
      *
      * @return all available rules.
@@ -104,49 +85,6 @@ public interface SonarLintEngine {
      * @return preferences
      */
     public Preferences getPreferences();
-
-    /**
-     * Retrieve excluded rules
-     *
-     * @return excluded rules
-     */
-    public Collection<RuleKey> getExcludedRules();
-
-    /**
-     * Exclude one rule
-     *
-     * @param ruleKey rule to exclude
-     */
-    public void excludeRuleKeys(List<RuleKey> ruleKey);
-
-    /**
-     * set rules to include
-     *
-     * @param ruleKeys rules to include
-     */
-    public void includeRuleKeys(List<RuleKey> ruleKeys);
-
-    /**
-     * include one rule
-     *
-     * @param ruleKey rule to include
-     */
-    public void includeRuleKey(RuleKey ruleKey);
-
-    /**
-     * exclude one rule
-     *
-     * @param ruleKey rule to exclude
-     */
-    public void excludeRuleKey(RuleKey ruleKey);
-
-    /**
-     * Check if rule must be exclude
-     *
-     * @param ruleDetails rule details
-     * @return true if rule must be exclude, false otherwise
-     */
-    public boolean isExcluded(RuleDetails ruleDetails);
 
     /**
      * Call consumer when engine is initialized. If already initialized,
@@ -190,4 +128,21 @@ public interface SonarLintEngine {
      * @return value of rule parameter or empty if not value changed
      */
     public Optional<String> getRuleParameter(String ruleKey, String parameterName);
+    
+    public void setSonarQubeServer(String server, String profieName, String profileId);
+    
+    public  Optional<String> getSonarQubeServer();
+    
+    public  Optional<String> getQualityProfile();
+    
+    public Optional<String> getProfileId();
+    
+    public boolean isInCludedRule(StandaloneRuleDetails ruleDetails);
+    
+    public void addAllSonarQubeRule(List<Rule> rules);
+    
+    public List<RuleKey> getExcludedKeys();
+    
+    public List<RuleKey> getIncludedKeys();
+
 }

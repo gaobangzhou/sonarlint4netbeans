@@ -19,8 +19,12 @@
  */
 package com.github.philippefichet.sonarlint4netbeans;
 
+import com.github.philippefichet.sonarlint4netbeans.option.Rule;
+import com.github.philippefichet.sonarlint4netbeans.option.SonarQubeOptionsListener;
+import com.github.philippefichet.sonarlint4netbeans.option.SonarQubeOptionsPanel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -32,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -45,7 +51,6 @@ import javax.swing.table.TableColumnModel;
 import org.openide.util.Lookup;
 import org.sonarsource.sonarlint.core.client.api.common.PluginDetails;
 import org.sonarsource.sonarlint.core.client.api.common.RuleKey;
-import org.sonarsource.sonarlint.core.client.api.common.Version;
 import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneRuleDetails;
 
 public final class SonarLintPanel extends javax.swing.JPanel {
@@ -53,8 +58,9 @@ public final class SonarLintPanel extends javax.swing.JPanel {
     private final SonarLintOptionsPanelController controller;
 
     private final Map<RuleKey, Boolean> ruleKeyChanged = new HashMap<>();
-    private String nodeJSPathToSave;
-    private Version nodeJSVersionToSave;
+    private String sonarServerToSave;
+    private String sonarProfileToSave;
+    private String sonarProfileIdToSave;
     private Boolean applyDifferentRulesOnTestFiles = null;
     private DefaultTableModel analyzerDefaultTableModel = new DefaultTableModel();
 
@@ -110,8 +116,8 @@ public final class SonarLintPanel extends javax.swing.JPanel {
                 if ("Analyzers".equals(categoriesList.getSelectedValue())) {
                     initAnalyzersPanel();
                 }
-                if ("Options".equals(categoriesList.getSelectedValue())) {
-                    initOptionsPanel(engine);
+                if ("SonarQube".equals(categoriesList.getSelectedValue())) {
+                    initSonarQubePanel(engine);
                 }
                 optionPanel.revalidate();
                 optionPanel.repaint();
@@ -132,51 +138,42 @@ public final class SonarLintPanel extends javax.swing.JPanel {
         optionPanel.add(analyzersTable, BorderLayout.CENTER);
     }
 
-    private void initOptionsPanel(SonarLintEngine engine) {
-        optionPanel.removeAll();
-        SonarLintOptionsPanelOptions container = new SonarLintOptionsPanelOptions(engine, new SonarLintOptionsPanelOptionsListener() {
-            @Override
-            public void nodeJSOptionsChanged(String nodeJSPath, Version nodeJSVersion) {
-                nodeJSPathToSave = nodeJSPath;
-                nodeJSVersionToSave = nodeJSVersion;
-                controller.changed();
-            }
-
-            @Override
-            public void testRulesOptionsChanged(Boolean apply) {
-                applyDifferentRulesOnTestFiles = apply;
-            }
-        });
-        optionPanel.add(container, BorderLayout.NORTH);
-        optionPanel.revalidate();
-        optionPanel.repaint();
-    }
-    
     private void initRulesPanel(SonarLintEngine sonarLintEngine) {
         optionPanel.removeAll();
         JPanel languageKeyContainer = new JPanel(new FlowLayout());
+        JButton resetSelectedRule = new JButton("Search");
+        resetSelectedRule.setToolTipText("Search");
         JTextField rulesFilter = new JTextField();
+        JLabel ruleNum = new JLabel();
         rulesFilter.setColumns(20);
-        JComboBox<String> comboLanguageKey = new JComboBox<>();
-        sonarLintEngine.getAllRuleDetails().stream()
-            .map(r -> r.getLanguage().getLanguageKey())
-            .distinct()
-            .forEach(comboLanguageKey::addItem);
+        JComboBox<String> comboStatusKey = new JComboBox<>();
+        comboStatusKey.addItem("all");
+        comboStatusKey.addItem("disable");
+        comboStatusKey.addItem("enable");
         rulesFilter.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                rulesDefaultTableModel.setRules(sonarLintEngine, (String)comboLanguageKey.getSelectedItem(), rulesFilter.getText());
+                rulesDefaultTableModel.setRules(sonarLintEngine, (String)comboStatusKey.getSelectedItem(), rulesFilter.getText());
+                ruleNum.setText("total:" + rulesDefaultTableModel.getRowCount());
             }
         });
-        comboLanguageKey.addActionListener(
-            e ->
-            rulesDefaultTableModel.setRules(sonarLintEngine, (String)comboLanguageKey.getSelectedItem(), rulesFilter.getText())
-        );
-        languageKeyContainer.add(new JLabel("language key: "));
-        languageKeyContainer.add(comboLanguageKey);
+        comboStatusKey.addItemListener((e) -> {
+            if (ItemEvent.SELECTED == e.getStateChange()) {
+                rulesDefaultTableModel.setRules(sonarLintEngine, (String) comboStatusKey.getSelectedItem(), rulesFilter.getText());
+                ruleNum.setText("total:" + rulesDefaultTableModel.getRowCount());
+            }
+        });
+//        resetSelectedRule.addActionListener( e -> {
+//
+//            rulesDefaultTableModel.setRules(sonarLintEngine,(String)comboStatusKey.getSelectedItem(), rulesFilter.getText());
+//            ruleNum.setText("total:" + rulesDefaultTableModel.getRowCount());
+//        });
+        languageKeyContainer.add(ruleNum);
         languageKeyContainer.add(new JSeparator());
+        languageKeyContainer.add(comboStatusKey);
         languageKeyContainer.add(new JLabel("filter: "));
         languageKeyContainer.add(rulesFilter);
+        languageKeyContainer.add(resetSelectedRule);
         
         JPanel northContainer = new JPanel();
         northContainer.setLayout(new BoxLayout(northContainer, BoxLayout.Y_AXIS));
@@ -209,7 +206,8 @@ public final class SonarLintPanel extends javax.swing.JPanel {
         columnModel.getColumn(SonarLintRuleTableModel.KEY_COLUMN_INDEX).setCellRenderer(new SonarLintRuleKeyTableCellRenderer(sonarLintEngine));
         columnModel.getColumn(SonarLintRuleTableModel.SEVERITY_COLUMN_INDEX).setCellRenderer(new SonarLintSeverityTableCellRenderer());
 
-        rulesDefaultTableModel.setRules(sonarLintEngine, (String)comboLanguageKey.getSelectedItem(), rulesFilter.getText());
+        rulesDefaultTableModel.setRules(sonarLintEngine,(String)comboStatusKey.getSelectedItem(), rulesFilter.getText());
+        ruleNum.setText("total:" + rulesDefaultTableModel.getRowCount());
         northContainer.add(languageKeyContainer);
         northContainer.add(rulesTable.getTableHeader());
         optionPanel.add(northContainer, BorderLayout.NORTH);
@@ -239,7 +237,7 @@ public final class SonarLintPanel extends javax.swing.JPanel {
         categoriesPanel.add(categoriesLabel);
 
         categoriesList.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Options", "Rules", "Analyzers" };
+            String[] strings = { "SonarQube", "Rules", "Analyzers" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -249,8 +247,6 @@ public final class SonarLintPanel extends javax.swing.JPanel {
         categoriesPanel.add(categoriesScrollPanel);
 
         add(categoriesPanel, java.awt.BorderLayout.WEST);
-
-        optionScrollPane.setViewportView(null);
 
         optionPanel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         optionPanel.setLayout(new java.awt.BorderLayout());
@@ -272,22 +268,23 @@ public final class SonarLintPanel extends javax.swing.JPanel {
     void store() {
         SonarLintOptions sonarLintOptions = Lookup.getDefault().lookup(SonarLintOptions.class);
         SonarLintEngine sonarLintEngine = Lookup.getDefault().lookup(SonarLintEngine.class);
-        List<RuleKey> ruleKeysEnable = new ArrayList<>();
-        List<RuleKey> ruleKeysDisable = new ArrayList<>();
+        
         ruleKeyChanged.forEach((ruleKey, enable) -> {
             if (enable) {
-                ruleKeysEnable.add(ruleKey);
+                sonarLintEngine.getRuleDetails(ruleKey.rule()).ifPresent(((ruleDetail) -> {
+                    sonarLintEngine.getIncludedKeys().add(ruleKey);
+                    sonarLintEngine.getExcludedKeys().remove(ruleKey);
+                }));
             } else {
-                ruleKeysDisable.add(ruleKey);
+                sonarLintEngine.getIncludedKeys().remove(ruleKey);
+                sonarLintEngine.getExcludedKeys().add(ruleKey);
             }
         });
         if (sonarLintOptions != null && applyDifferentRulesOnTestFiles != null) {
             sonarLintOptions.useDifferentRulesOnTestFiles(applyDifferentRulesOnTestFiles);
         }
-        sonarLintEngine.excludeRuleKeys(ruleKeysDisable);
-        sonarLintEngine.includeRuleKeys(ruleKeysEnable);
-        if (nodeJSPathToSave != null && nodeJSVersionToSave != null) {
-            sonarLintEngine.setNodeJSPathAndVersion(nodeJSPathToSave, nodeJSVersionToSave);
+        if (sonarServerToSave != null && sonarProfileToSave != null) {
+            sonarLintEngine.setSonarQubeServer(sonarServerToSave, sonarProfileToSave, sonarProfileIdToSave);
         }
     }
 
@@ -304,4 +301,21 @@ public final class SonarLintPanel extends javax.swing.JPanel {
     javax.swing.JPanel optionPanel;
     javax.swing.JScrollPane optionScrollPane;
     // End of variables declaration//GEN-END:variables
+
+    private void initSonarQubePanel(SonarLintEngine engine) {
+        optionPanel.removeAll();
+        SonarQubeOptionsPanel sonarQubeOptions = new SonarQubeOptionsPanel(engine, new SonarQubeOptionsListener() {
+            @Override
+            public void sonarQubeOptionsChanged(String server, String profileName, String profileId) {
+
+                sonarServerToSave = server;
+                sonarProfileToSave = profileName;
+                sonarProfileIdToSave = profileId;
+                controller.changed();
+            }
+        });
+        optionPanel.add(sonarQubeOptions, BorderLayout.NORTH);
+        optionPanel.revalidate();
+        optionPanel.repaint();
+    }
 }

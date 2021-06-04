@@ -20,8 +20,10 @@
 package com.github.philippefichet.sonarlint4netbeans;
 
 import java.util.Collection;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.swing.table.DefaultTableModel;
+import org.sonarsource.sonarlint.core.client.api.common.RuleDetails;
 import org.sonarsource.sonarlint.core.client.api.standalone.StandaloneRuleDetails;
 
 
@@ -48,20 +50,28 @@ public class SonarLintRuleTableModel extends DefaultTableModel {
         addColumn("Details");
     }
 
-    public void setRules(SonarLintEngine engine, String languagekey, String ruleFilter) {
+    public void setRules(SonarLintEngine engine, String status, String ruleFilter) {
         while(getRowCount() > 0) {
             removeRow(0);
         }
         Collection<StandaloneRuleDetails> allRuleDetails = engine.getAllRuleDetails();
         allRuleDetails.stream()
-        .filter(
-            SonarLintUtils.FilterBy.languageKey(languagekey)
-            .and(SonarLintUtils.FilterBy.keyAndName(ruleFilter))
-        )
+                .filter(SonarLintUtils.FilterBy.keyAndName(ruleFilter)
+                        .and((RuleDetails t) -> {
+
+                            if (status.equals("all")) {
+                                return true;
+                            } else if (status.equals("enable")) {
+                                return engine.isInCludedRule((StandaloneRuleDetails)t);
+                            } else {
+                                return !engine.isInCludedRule((StandaloneRuleDetails) t);
+                            }
+                        })
+                )
         .sorted((r1, r2) -> 
             r1.getKey().compareTo(r2.getKey())
         ).map(ruleDetail -> new Object[] {
-            !engine.isExcluded(ruleDetail),
+            engine.isInCludedRule(ruleDetail),
             hasParams(ruleDetail),
             ruleDetail.getKey(),
             ruleDetail.getSeverity(),
