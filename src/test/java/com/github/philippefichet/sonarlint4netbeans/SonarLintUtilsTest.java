@@ -171,9 +171,9 @@ public class SonarLintUtilsTest {
     public void analyzeWithParameter() throws BackingStoreException, IOException {
         SonarLintEngine sonarLintEngine = Lookup.getDefault().lookup(SonarLintEngine.class);
         sonarLintEngine.getPreferences().removeNode();
-        sonarLintEngine.getAllRuleDetails().forEach(ruleKey -> sonarLintEngine.excludeRuleKey(RuleKey.parse(ruleKey.getKey())));
-        sonarLintEngine.includeRuleKey( RuleKey.parse("java:S100"));
-        sonarLintEngine.includeRuleKey( RuleKey.parse("java:S1186"));
+        //sonarLintEngine.getAllRuleDetails().forEach(ruleKey -> sonarLintEngine.excludeRuleKey(RuleKey.parse(ruleKey.getKey())));
+        //sonarLintEngine.includeRuleKey( RuleKey.parse("java:S100"));
+        //sonarLintEngine.includeRuleKey( RuleKey.parse("java:S1186"));
         sonarLintEngine.setRuleParameter("java:S100", "format", "^.+$");
 
         // first step, check all issue in file
@@ -376,8 +376,8 @@ public class SonarLintUtilsTest {
         SonarLintEngine sonarLintEngine = Lookup.getDefault().lookup(SonarLintEngine.class);
         sonarLintEngine.getPreferences().removeNode();
         String ruleKeyString = "java:S115";
-        sonarLintEngine.getAllRuleDetails().forEach(ruleKey -> sonarLintEngine.excludeRuleKey(RuleKey.parse(ruleKey.getKey())));
-        sonarLintEngine.includeRuleKey( RuleKey.parse(ruleKeyString));
+        //sonarLintEngine.getAllRuleDetails().forEach(ruleKey -> sonarLintEngine.excludeRuleKey(RuleKey.parse(ruleKey.getKey())));
+        //sonarLintEngine.includeRuleKey( RuleKey.parse(ruleKeyString));
         File sonarlintFileDemo = FileUtil.normalizeFile(new File("./src/test/resources/SonarLintFileDemo.java").getAbsoluteFile());
         Path sonarlintFileDemoPath = sonarlintFileDemo.toPath();
         sonarLintEngine.setRuleParameter(ruleKeyString, "format", "^.+$");

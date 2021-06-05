@@ -170,10 +170,10 @@ public class SonarLintEngineImplTest {
         );
         String sonarLintHome = System.getProperty("user.home") + File.separator + ".sonarlint4netbeans";
         SonarLintTestUtils.installNodeJS();
-        sonarLintEngine.setNodeJSPathAndVersion(
-            SonarLintTestUtils.getNodeJS().getAbsolutePath(),
-            Version.create(SonarLintTestUtils.getNodeJSVersion())
-        );
+//        sonarLintEngine.setNodeJSPathAndVersion(
+//            SonarLintTestUtils.getNodeJS().getAbsolutePath(),
+//            Version.create(SonarLintTestUtils.getNodeJSVersion())
+//        );
         sonarLintEngine.waitingInitialization();
 
         StandaloneAnalysisConfiguration standaloneAnalysisConfiguration = 
